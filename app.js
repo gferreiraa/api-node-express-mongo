@@ -1,13 +1,11 @@
  const express = require('express')
  const app = express()
 
- app.get('/', (req, res) => {
-  return res.send({ message: 'Tudo Ok com o metódo GET!'})
- });
+ const indexRoute = require('./Routes/index')
+ const userRoute = require('./Routes/users')
 
- app.post('/', (req, res) => {
-  return res.send({ message: 'Tudo Ok com o metodo POST!'})
- });
+ app.use('/', indexRoute)
+ app.use('/users', userRoute)
 
  app.listen(3000)
 
