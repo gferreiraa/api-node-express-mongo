@@ -4,6 +4,17 @@ const bcrypt = require('bcrypt')
 
 const Users = require('../model/user')
 
+router.get('/', async (req, res) => {
+  try {
+    const users = await Users.find({})
+    return res.send(users)
+  }
+  catch(err) {
+    return res.send({ error: 'Erro na consulta de usuários!' })
+  }
+})
+
+
 router.get('/', (req, res) => {
   Users.find({}, (err, data) => {
     if(err) return  res.send({ error: 'Erro  na consulta de usuários' });
