@@ -14,46 +14,42 @@ router.get('/', async (req, res) => {
   }
 })
 
-
-router.get('/', (req, res) => {
-  Users.find({}, (err, data) => {
-    if(err) return  res.send({ error: 'Erro  na consulta de usuários' });
-      return res.send(data)
-  })
-})
-
-router.post('/create', (req, res) => {
+router.post('/create', async (req, res) => {
   const { email, password } = req.body
   if(!email || !password) return res.send({ error: 'Dados insuficientes' })
 
-  Users.findOne({ email }, (err, data) => {
-    if(err) return res.send({ error: 'Erro ao buscar usuário' })
-    if(data) return res.send({ error: 'Usuário já registrado' })
-    
-    Users.create(req.body, (err, data) => {
-      if(err) return res.send({ error: 'Erro ao criar usuário' })
+  try {
+    if(await Users.findOne({ email })) return res.send({ error: 'Usuário já registrado!'})
 
-        data.password = undefined
-        return res.send(data)
-    })
-  })
+    const user = await Users.create(req.body)
+    user.password = undefined
+    return res.send(user)
+
+
+  }
+  catch (err) {
+    return res.send({ error: 'Erro ao buscar usuário!' })
+  }
 })
 
-router.post('/auth', (req, res) =>{
-  const { email, password } = req.body
-  if(!email || !password) return  res.send({ error: 'Dados insuficientes!' })
+router.post('/auth', async (req, res) => {
+  const { email, password} = req.body
 
-  Users.findOne({email}, (err, data) => {
-    if(err) return res.send({ error: 'Erro ao buscar usuário!' })
-    if(!data) return res.send({ error: 'Usuário  não registrado!'})
+  if(!email || !password) return res.send({ error: 'Dados Insuficientes! '})
 
-    bcrypt.compare(password, data.password, (err, same) => {
-      if(!same) return res.send({ error: 'Erro ao autenticar usuário!'})
+  try {
+    const user = await Users.findOne({ email }).select('+password')
+    if(!user) return res.send({ error: 'Usuário não registrado!' })
 
-      data.password = undefined
-      return res.send(data)
-    })
-  }).select('+password')
+    const pass_ok = await bcrypt.compare(password, user.password)
+    if(!pass_ok) return res.send({ error: 'Erro ao autenticar usuário!' })
+    
+    user.password = undefined
+    return res.send(user)
+  }
+  catch (err) {
+    return res.send({ error: 'Erro ao buscar usuário' })
+  }
 })
 
 module.exports = router
