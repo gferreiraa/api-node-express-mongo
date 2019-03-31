@@ -4,8 +4,10 @@
  const  mongoose = require('mongoose');
  const bodyParser = require('body-parser')
 
+ const config = require('./config/config')
+
  // Mongoose
- const url = 'mongodb+srv://usuario_admin:12345@cluster0-avzlp.mongodb.net/test?retryWrites=true'
+ const url = config.bd_string
  const options = { reconnectTries: Number.MAX_VALUE, reconnectInterval: 500, poolSize: 5, useNewUrlParser: true }
 
  mongoose.connect(url, options)
